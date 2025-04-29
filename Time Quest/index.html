@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Quest: Productivity Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+    <div class="container mx-auto p-4 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-yellow-400">Time Quest</h1>
+            <p class="text-lg text-gray-300">Master your time, earn points, conquer tasks!</p>
+        </header>
+
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Task Input and List -->
+            <div class="md:w-1/2 bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-yellow-400 mb-4">Your Quests</h2>
+                <div class="flex gap-2 mb-4">
+                    <input id="taskInput" type="text" placeholder="Enter a new task" class="flex-1 p-2 bg-gray-700 text-white rounded">
+                    <button onclick="addTask()" class="bg-yellow-400 text-gray-900 px-4 py-2 rounded hover:bg-yellow-500">Add</button>
+                </div>
+                <ul id="taskList" class="space-y-2"></ul>
+            </div>
+
+            <!-- Timer and Points -->
+            <div class="md:w-1/2 bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-yellow-400 mb-4">Work Session</h2>
+                <div class="text-center">
+                    <div id="timer" class="text-5xl font-mono text-white mb-4">25:00</div>
+                    <button id="startPauseBtn" onclick="toggleTimer()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">Start</button>
+                    <button onclick="resetTimer()" class="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 ml-2">Reset</button>
+                </div>
+                <div class="mt-6 text-center">
+                    <h3 class="text-xl font-semibold text-yellow-400">Your Score</h3>
+                    <p id="points" class="text-3xl">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-semibold text-yellow-400 mb-2">Progress</h2>
+            <div class="w-full bg-gray-700 rounded-full h-4">
+                <div id="progressBar" class="bg-yellow-400 h-4 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
