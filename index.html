@@ -5,80 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Time Quest: Productivity Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
-<body class="bg-gray-900 text-white font-sans">
-    <div class="container mx-auto p-4 max-w-4xl">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-yellow-400">Time Quest</h1>
-            <p class="text-lg text-gray-300">Master your time, earn points, conquer tasks!</p>
+<body class="bg-gray-900 text-white font-sans min-h-screen">
+    <div class="container mx-auto p-4 max-w-5xl relative">
+        <!-- Dhikr Display -->
+        <div id="dhikrOverlay" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg text-center max-w-md w-full">
+                <h3 class="text-2xl sm:text-3xl font-semibold text-yellow-400 mb-4">ذكر الله</h3>
+                <p id="dhikrMessage" class="text-xl sm:text-2xl text-yellow-200 italic mb-6"></p>
+                <button onclick="hideDhikr()" class="bg-yellow-400 text-gray-900 px-4 py-2 rounded hover:bg-yellow-500">إغلاق</button>
+            </div>
+        </div>
+
+        <header class="text-center mb-6 sm:mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-yellow-400">Time Quest</h1>
+            <p class="text-base sm:text-lg text-gray-300 mt-2">Master your time, earn points, conquer tasks!</p>
         </header>
 
-        <div class="flex flex-col md:flex-row gap-6">
+        <div class="flex flex-col md:flex-row gap-4 sm:gap-6">
             <!-- Task Input and List -->
-            <div class="md:w-1/2 bg-gray-800 p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold text-yellow-400 mb-4">Your Quests</h2>
+            <div class="w-full md:w-1/2 bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl sm:text-2xl font-semibold text-yellow-400 mb-4">Your Quests</h2>
                 <div class="flex flex-col gap-2 mb-4">
-                    <input id="taskInput" type="text" placeholder="Enter a new task" class="flex-1 p-2 bg-gray-700 text-white rounded">
-                    <div class="flex gap-2">
-                        <select id="urgentSelect" class="p-2 bg-gray-700 text-white rounded">
+                    <input id="taskInput" type="text" placeholder="Enter a new task" class="w-full p-2 bg-gray-700 text-white rounded text-sm sm:text-base">
+                    <div class="flex flex-wrap gap-2">
+                        <select id="urgentSelect" class="p-2 bg-gray-700 text-white rounded text-sm sm:text-base flex-1 min-w-[120px]">
                             <option value="urgent">Urgent</option>
                             <option value="not-urgent">Not Urgent</option>
                         </select>
-                        <select id="importantSelect" class="p-2 bg-gray-700 text-white rounded">
+                        <select id="importantSelect" class="p-2 bg-gray-700 text-white rounded text-sm sm:text-base flex-1 min-w-[120px]">
                             <option value="important">Important</option>
                             <option value="not-important">Not Important</option>
                         </select>
-                        <button onclick="addTask()" class="bg-yellow-400 text-gray-900 px-4 py-2 rounded hover:bg-yellow-500">Add</button>
+                        <button onclick="addTask()" class="bg-yellow-400 text-gray-900 px-4 py-2 rounded hover:bg-yellow-500 text-sm sm:text-base flex-shrink-0">Add</button>
                     </div>
                 </div>
-                <ul id="taskList" class="space-y-2"></ul>
+                <ul id="taskList" class="space-y-2 max-h-64 overflow-y-auto"></ul>
             </div>
 
             <!-- Timer and Points -->
-            <div class="md:w-1/2 bg-gray-800 p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold text-yellow-400 mb-4">Work Session</h2>
+            <div class="w-full md:w-1/2 bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl sm:text-2xl font-semibold text-yellow-400 mb-4">Work Session</h2>
                 <div class="text-center">
-                    <div class="mb-4">
-                        <label for="timerInput" class="text-lg text-gray-300">Set Timer (minutes):</label>
-                        <input id="timerInput" type="number" min="1" value="25" class="p-2 w-20 bg-gray-700 text-white rounded ml-2">
+                    <div class="mb-4 flex flex-col items-center gap-2">
+                        <label for="timerSelect" class="text-base sm:text-lg text-gray-300">Set Timer (minutes):</label>
+                        <select id="timerSelect" class="p-2 bg-gray-700 text-white rounded text-sm sm:text-base w-32">
+                            <option value="5">5 minutes</option>
+                            <option value="15">15 minutes</option>
+                            <option value="25" selected>25 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="60">60 minutes</option>
+                        </select>
                     </div>
-                    <div id="timer" class="text-5xl font-mono text-white mb-4">25:00</div>
-                    <button id="startPauseBtn" onclick="toggleTimer()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">Start</button>
-                    <button onclick="resetTimer()" class="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 ml-2">Reset</button>
+                    <div id="timer" class="text-4xl sm:text-5xl font-mono text-white mb-4">25:00</div>
+                    <div class="flex justify-center gap-2">
+                        <button id="startPauseBtn" onclick="toggleTimer()" class="bg-green-500 text-white px-4 sm:px-6 py-2 rounded hover:bg-green-600 text-sm sm:text-base">Start</button>
+                        <button onclick="resetTimer()" class="bg-red-500 text-white px-4 sm:px-6 py-2 rounded hover:bg-red-600 text-sm sm:text-base">Reset</button>
+                    </div>
                 </div>
                 <div class="mt-6 text-center">
-                    <h3 class="text-xl font-semibold text-yellow-400">Your Score</h3>
-                    <p id="points" class="text-3xl">0</p>
+                    <h3 class="text-lg sm:text-xl font-semibold text-yellow-400">Your Score</h3>
+                    <p id="points" class="text-2xl sm:text-3xl">0</p>
                 </div>
             </div>
         </div>
 
         <!-- Eisenhower Matrix -->
-        <div class="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-semibold text-yellow-400 mb-4">Eisenhower Matrix</h2>
-            <div class="grid grid-cols-2 gap-4">
+        <div class="mt-6 sm:mt-8 bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl sm:text-2xl font-semibold text-yellow-400 mb-4">Eisenhower Matrix</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="border border-gray-600 p-4 rounded">
-                    <h3 class="text-lg font-bold text-green-400">Do First (Urgent & Important)</h3>
-                    <ul id="urgentImportant" class="mt-2 space-y-2"></ul>
+                    <h3 class="text-base sm:text-lg font-bold text-green-400">Do First (Urgent & Important)</h3>
+                    <ul id="urgentImportant" class="mt-2 space-y-2 max-h-40 overflow-y-auto"></ul>
                 </div>
                 <div class="border border-gray-600 p-4 rounded">
-                    <h3 class="text-lg font-bold text-blue-400">Schedule (Not Urgent & Important)</h3>
-                    <ul id="notUrgentImportant" class="mt-2 space-y-2"></ul>
+                    <h3 class="text-base sm:text-lg font-bold text-blue-400">Schedule (Not Urgent & Important)</h3>
+                    <ul id="notUrgentImportant" class="mt-2 space-y-2 max-h-40 overflow-y-auto"></ul>
                 </div>
                 <div class="border border-gray-600 p-4 rounded">
-                    <h3 class="text-lg font-bold text-yellow-400">Delegate (Urgent & Not Important)</h3>
-                    <ul id="urgentNotImportant" class="mt-2 space-y-2"></ul>
+                    <h3 class="text-base sm:text-lg font-bold text-yellow-400">Delegate (Urgent & Not Important)</h3>
+                    <ul id="urgentNotImportant" class="mt-2 space-y-2 max-h-40 overflow-y-auto"></ul>
                 </div>
                 <div class="border border-gray-600 p-4 rounded">
-                    <h3 class="text-lg font-bold text-red-400">Eliminate (Not Urgent & Not Important)</h3>
-                    <ul id="notUrgentNotImportant" class="mt-2 space-y-2"></ul>
+                    <h3 class="text-base sm:text-lg font-bold text-red-400">Eliminate (Not Urgent & Not Important)</h3>
+                    <ul id="notUrgentNotImportant" class="mt-2 space-y-2 max-h-40 overflow-y-auto"></ul>
                 </div>
             </div>
         </div>
 
         <!-- Progress Bar -->
-        <div class="mt-8">
-            <h2 class="text-2xl font-semibold text-yellow-400 mb-2">Progress</h2>
+        <div class="mt-6 sm:mt-8">
+            <h2 class="text-xl sm:text-2xl font-semibold text-yellow-400 mb-2">Progress</h2>
             <div class="w-full bg-gray-700 rounded-full h-4">
                 <div id="progressBar" class="bg-yellow-400 h-4 rounded-full" style="width: 0%"></div>
             </div>
@@ -93,10 +111,48 @@
         let isRunning = false;
         let intervalId = null;
 
+        // Dhikr Array
+        const motivationalQuotes = [
+            "سبحان الله وبحمده 🌟",
+            "الحمد لله رب العالمين ✨",
+            "لا إله إلا الله وحده لا شريك له 🤲",
+            "الله أكبر كبيرًا 🌱",
+            "أستغفر الله العظيم وأتوب إليه 🙏",
+            "سبحان الله العظيم 🌟",
+            "لا حول ولا قوة إلا بالله ✨",
+            "اللهم صل وسلم على سيدنا محمد 🌸",
+            "حسبي الله لا إله إلا هو 🌟",
+            "سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر 🤲"
+        ];
+
+        function getRandomQuote() {
+            const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+            return motivationalQuotes[randomIndex];
+        }
+
+        function showDhikr() {
+            const dhikrOverlay = document.getElementById('dhikrOverlay');
+            const dhikrMessage = document.getElementById('dhikrMessage');
+            dhikrMessage.textContent = getRandomQuote();
+            dhikrOverlay.classList.remove('hidden');
+        }
+
+        function hideDhikr() {
+            const dhikrOverlay = document.getElementById('dhikrOverlay');
+            dhikrOverlay.classList.add('hidden');
+        }
+
+        function launchConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
         function updateInitialTimer() {
-            const timerInput = document.getElementById('timerInput');
-            const minutes = parseInt(timerInput.value) || 1; // Default to 1 if invalid
-            if (minutes < 1) timerInput.value = 1; // Prevent negative or zero
+            const timerSelect = document.getElementById('timerSelect');
+            const minutes = parseInt(timerSelect.value);
             initialTimer = minutes * 60; // Convert to seconds
             if (!isRunning) {
                 timer = initialTimer;
@@ -129,6 +185,7 @@
             renderTasks();
             renderMatrix();
             updateProgress();
+            launchConfetti();
         }
 
         function deleteTask(index) {
@@ -143,12 +200,12 @@
             taskList.innerHTML = '';
             tasks.forEach((task, index) => {
                 const li = document.createElement('li');
-                li.className = 'flex justify-between items-center p-2 bg-gray-700 rounded';
+                li.className = 'flex flex-col sm:flex-row justify-between items-center p-2 bg-gray-700 rounded';
                 li.innerHTML = `
-                    <span class="${task.completed ? 'line-through text-gray-400' : ''}">${task.text}</span>
-                    <div>
-                        ${!task.completed ? `<button onclick="completeTask(${index})" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mr-2">Complete</button>` : ''}
-                        <button onclick="deleteTask(${index})" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Delete</button>
+                    <span class="${task.completed ? 'line-through text-gray-400' : ''} text-sm sm:text-base">${task.text}</span>
+                    <div class="flex gap-2 mt-2 sm:mt-0">
+                        ${!task.completed ? `<button onclick="completeTask(${index})" class="bg-green-500 text-white px-2 sm:px-3 py-1 rounded hover:bg-green-600 text-xs sm:text-sm">Complete</button>` : ''}
+                        <button onclick="deleteTask(${index})" class="bg-red-500 text-white px-2 sm:px-3 py-1 rounded hover:bg-red-600 text-xs sm:text-sm">Delete</button>
                     </div>
                 `;
                 taskList.appendChild(li);
@@ -170,7 +227,7 @@
                 if (task.completed) return; // Skip completed tasks
 
                 const li = document.createElement('li');
-                li.className = 'p-2 bg-gray-700 rounded';
+                li.className = 'p-2 bg-gray-700 rounded text-sm sm:text-base';
                 li.textContent = task.text;
 
                 if (task.urgent && task.important) {
@@ -207,7 +264,7 @@
                 clearInterval(intervalId);
                 document.getElementById('startPauseBtn').textContent = 'Start';
             } else {
-                updateInitialTimer(); // Update timer in case input changed
+                updateInitialTimer(); // Update timer in case selection changed
                 intervalId = setInterval(() => {
                     if (timer > 0) {
                         timer--;
@@ -218,7 +275,8 @@
                         document.getElementById('startPauseBtn').textContent = 'Start';
                         points += 25; // Earn 25 points for completing a session
                         updatePoints();
-                        alert('Session complete! +25 points');
+                        launchConfetti();
+                        showDhikr(); // Show a random dhikr in the overlay
                     }
                 }, 1000);
                 document.getElementById('startPauseBtn').textContent = 'Pause';
@@ -229,10 +287,11 @@
         function resetTimer() {
             clearInterval(intervalId);
             isRunning = false;
-            updateInitialTimer(); // Reset to the input value
+            updateInitialTimer(); // Reset to the selected value
             timer = initialTimer;
             document.getElementById('timer').textContent = formatTime(timer);
             document.getElementById('startPauseBtn').textContent = 'Start';
+            hideDhikr(); // Hide dhikr when resetting
         }
 
         // Initialize
@@ -240,8 +299,8 @@
         updateProgress();
         renderMatrix();
 
-        // Update timer display when input changes
-        document.getElementById('timerInput').addEventListener('input', () => {
+        // Update timer display when selection changes
+        document.getElementById('timerSelect').addEventListener('change', () => {
             if (!isRunning) {
                 updateInitialTimer();
             }
