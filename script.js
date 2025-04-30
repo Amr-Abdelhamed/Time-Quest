@@ -6,11 +6,19 @@ let intervalId = null;
 
 function addTask() {
     const taskInput = document.getElementById('taskInput');
+    const urgentSelect = document.getElementById('urgentSelect');
+    const importantSelect = document.getElementById('importantSelect');
     const taskText = taskInput.value.trim();
     if (taskText) {
-        tasks.push({ text: taskText, completed: false });
+        tasks.push({
+            text: taskText,
+            completed: false,
+            urgent: urgentSelect.value === 'urgent',
+            important: importantSelect.value === 'important'
+        });
         taskInput.value = '';
         renderTasks();
+        renderMatrix();
     }
 }
 
@@ -19,12 +27,14 @@ function completeTask(index) {
     points += 10; // Earn 10 points per task
     updatePoints();
     renderTasks();
+    renderMatrix();
     updateProgress();
 }
 
 function deleteTask(index) {
     tasks.splice(index, 1);
     renderTasks();
+    renderMatrix();
     updateProgress();
 }
 
@@ -35,13 +45,43 @@ function renderTasks() {
         const li = document.createElement('li');
         li.className = 'flex justify-between items-center p-2 bg-gray-700 rounded';
         li.innerHTML = `
-            <span class="${task.completed ? 'line-through text-gray-400' : ''}">${task.text}</span>
-            <div>
-                ${!task.completed ? `<button onclick="completeTask(${index})" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mr-2">Complete</button>` : ''}
-                <button onclick="deleteTask(${index})" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Delete</button>
-            </div>
-        `;
+                    <span class="${task.completed ? 'line-through text-gray-400' : ''}">${task.text}</span>
+                    <div>
+                        ${!task.completed ? `<button onclick="completeTask(${index})" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mr-2">Complete</button>` : ''}
+                        <button onclick="deleteTask(${index})" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Delete</button>
+                    </div>
+                `;
         taskList.appendChild(li);
+    });
+}
+
+function renderMatrix() {
+    const urgentImportant = document.getElementById('urgentImportant');
+    const notUrgentImportant = document.getElementById('notUrgentImportant');
+    const urgentNotImportant = document.getElementById('urgentNotImportant');
+    const notUrgentNotImportant = document.getElementById('notUrgentNotImportant');
+
+    urgentImportant.innerHTML = '';
+    notUrgentImportant.innerHTML = '';
+    urgentNotImportant.innerHTML = '';
+    notUrgentNotImportant.innerHTML = '';
+
+    tasks.forEach((task, index) => {
+        if (task.completed) return; // Skip completed tasks
+
+        const li = document.createElement('li');
+        li.className = 'p-2 bg-gray-700 rounded';
+        li.textContent = task.text;
+
+        if (task.urgent && task.important) {
+            urgentImportant.appendChild(li);
+        } else if (!task.urgent && task.important) {
+            notUrgentImportant.appendChild(li);
+        } else if (task.urgent && !task.important) {
+            urgentNotImportant.appendChild(li);
+        } else {
+            notUrgentNotImportant.appendChild(li);
+        }
     });
 }
 
@@ -96,3 +136,4 @@ function resetTimer() {
 // Initialize
 updatePoints();
 updateProgress();
+renderMatrix();
