@@ -1,4 +1,4 @@
-let tasks = [];
+ let tasks = [];
         let points = 0;
         let initialTimer = 25 * 60; // Default 25 minutes in seconds
         let timer = initialTimer; // Current timer value
