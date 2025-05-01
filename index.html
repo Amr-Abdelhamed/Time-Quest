@@ -125,6 +125,55 @@
             "سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر 🤲"
         ];
 
+        // Load data from Local Storage on page load
+        function loadData() {
+            // Load tasks
+            const savedTasks = localStorage.getItem('tasks');
+            if (savedTasks) {
+                tasks = JSON.parse(savedTasks);
+            }
+
+            // Load points
+            const savedPoints = localStorage.getItem('points');
+            if (savedPoints) {
+                points = parseInt(savedPoints);
+            }
+
+            // Load timer and initialTimer
+            const savedTimer = localStorage.getItem('timer');
+            const savedInitialTimer = localStorage.getItem('initialTimer');
+            const savedIsRunning = localStorage.getItem('isRunning');
+            if (savedTimer) {
+                timer = parseInt(savedTimer);
+            }
+            if (savedInitialTimer) {
+                initialTimer = parseInt(savedInitialTimer);
+                // Update the timer select dropdown to reflect the saved initialTimer
+                const timerSelect = document.getElementById('timerSelect');
+                timerSelect.value = initialTimer / 60; // Convert seconds to minutes
+            }
+            if (savedIsRunning === 'true') {
+                isRunning = true;
+                toggleTimer(); // Resume the timer if it was running
+            }
+
+            // Update UI
+            renderTasks();
+            renderMatrix();
+            updatePoints();
+            updateProgress();
+            document.getElementById('timer').textContent = formatTime(timer);
+        }
+
+        // Save data to Local Storage
+        function saveData() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('points', points.toString());
+            localStorage.setItem('timer', timer.toString());
+            localStorage.setItem('initialTimer', initialTimer.toString());
+            localStorage.setItem('isRunning', isRunning.toString());
+        }
+
         function getRandomQuote() {
             const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
             return motivationalQuotes[randomIndex];
@@ -158,6 +207,7 @@
                 timer = initialTimer;
                 document.getElementById('timer').textContent = formatTime(timer);
             }
+            saveData(); // Save the updated initialTimer
         }
 
         function addTask() {
@@ -175,6 +225,7 @@
                 taskInput.value = '';
                 renderTasks();
                 renderMatrix();
+                saveData(); // Save tasks after adding
             }
         }
 
@@ -186,6 +237,7 @@
             renderMatrix();
             updateProgress();
             launchConfetti();
+            saveData(); // Save tasks and points after completing
         }
 
         function deleteTask(index) {
@@ -193,6 +245,7 @@
             renderTasks();
             renderMatrix();
             updateProgress();
+            saveData(); // Save tasks after deleting
         }
 
         function renderTasks() {
@@ -244,6 +297,7 @@
 
         function updatePoints() {
             document.getElementById('points').textContent = points;
+            saveData(); // Save points after updating
         }
 
         function updateProgress() {
@@ -269,6 +323,7 @@
                     if (timer > 0) {
                         timer--;
                         document.getElementById('timer').textContent = formatTime(timer);
+                        saveData(); // Save timer state during running
                     } else {
                         clearInterval(intervalId);
                         isRunning = false;
@@ -277,11 +332,13 @@
                         updatePoints();
                         launchConfetti();
                         showDhikr(); // Show a random dhikr in the overlay
+                        saveData(); // Save state after timer ends
                     }
                 }, 1000);
                 document.getElementById('startPauseBtn').textContent = 'Pause';
             }
             isRunning = !isRunning;
+            saveData(); // Save isRunning state
         }
 
         function resetTimer() {
@@ -292,12 +349,13 @@
             document.getElementById('timer').textContent = formatTime(timer);
             document.getElementById('startPauseBtn').textContent = 'Start';
             hideDhikr(); // Hide dhikr when resetting
+            localStorage.removeItem('timer'); // Clear timer from Local Storage
+            localStorage.removeItem('isRunning'); // Clear isRunning from Local Storage
+            saveData(); // Save the reset state
         }
 
-        // Initialize
-        updatePoints();
-        updateProgress();
-        renderMatrix();
+        // Load data when the page loads
+        loadData();
 
         // Update timer display when selection changes
         document.getElementById('timerSelect').addEventListener('change', () => {
